@@ -17,7 +17,7 @@ echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /
 sudo apt-get update
 sudo apt-get install mono-complete mono-basic-dbg mono-dbg mono-runtime-dbg
 11. Check Mono with "mono -V"
-12. Clone RunMonitor Host Control with "git clone https://github.com/Lifemotion/host-control-service.git"
+12. Clone RunMonitor Host Control with "git clone https://github.com/Lifemotion/rmhc.git"
 13. Change directory with "cd host-control-service/bin"
 14. Start RMHC with "mono Bwl.Tools.RunMonitorPlatform.HostControl.exe localserver=8064=LinuxPC remoteapp"
 15. Start RunMonitor Host Client on PC, use "Find local servers" to find RPi
