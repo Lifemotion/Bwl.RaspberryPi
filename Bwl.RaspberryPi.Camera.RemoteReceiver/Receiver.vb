@@ -12,8 +12,8 @@ Public Class Receiver
             IO.File.WriteAllBytes(Now.Ticks.ToString + ".jpg", packet.Bytes)
             Dim bmp As New Bitmap(New IO.MemoryStream(packet.Bytes))
             Me.Invoke(Sub()
-                          PictureBox1.Image = bmp
-                          PictureBox1.Refresh()
+                          pbFrame.Image = bmp
+                          pbFrame.Refresh()
                       End Sub)
         Catch ex As Exception
         End Try
@@ -21,5 +21,23 @@ Public Class Receiver
 
     Private Sub Receiver_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
+    End Sub
+
+    Private Sub bSendParameters_Click(sender As Object, e As EventArgs) Handles bSendParameters.Click
+        Dim sbp As New StructuredPacket
+        sbp.Add("Width", CInt(tbWidth.Text))
+        sbp.Add("Height", CInt(tbHeight.Text))
+        sbp.Add("FPS", CInt(tbFPS.Text))
+        sbp.Add("Shutter", CInt(tbShutter.Text))
+        sbp.Add("ISO", CInt(tbISO.Text))
+        sbp.Add("Options", tbOptions.Text)
+        Dim bp = sbp.ToBytePacket
+
+        For Each conn In _listener.ActiveConnections
+            Try
+                conn.SendPacket(bp)
+            Catch ex As Exception
+            End Try
+        Next
     End Sub
 End Class

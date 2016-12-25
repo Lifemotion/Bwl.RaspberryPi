@@ -12,6 +12,7 @@ Public Class RpiCamStill
     Public ReadOnly Property FrameBytesBuffer As Byte() = {} Implements IRpiCam.FrameBytesBuffer
     Public ReadOnly Property FrameBytesFormat As RpiCamFrameType = RpiCamFrameType.bmp Implements IRpiCam.FrameBytesFormat
     Public ReadOnly Property FrameCounter As Integer Implements IRpiCam.FrameCounter
+    Public ReadOnly Property CameraParameters As New CameraParameters Implements IRpiCam.CameraParameters
 
     Public ReadOnly Property FrameBytesLength As Integer Implements IRpiCam.FrameBytesLength
         Get
@@ -23,14 +24,15 @@ Public Class RpiCamStill
 
     End Sub
 
-    Public Sub Open(width As Integer, height As Integer, fps As Integer, options As String) Implements IRpiCam.Open
+    Public Sub Open() Implements IRpiCam.Open
         Close()
 
-        _FrameBytesBuffer = New Byte((width * height * 3) + 53) {}
+        _FrameBytesBuffer = New Byte((CameraParameters.Width * CameraParameters.Height * 3) + 53) {}
         If System.Environment.OSVersion.Platform = PlatformID.Unix Then
             _prc = New Process
             _prc.StartInfo.FileName = "raspistill"
-            _prc.StartInfo.Arguments = "-e bmp -h " + height.ToString + " -w " + width.ToString + " -n -t 999999999 -k " + options + "-o -"
+            _prc.StartInfo.Arguments = "-e bmp -h " + CameraParameters.Height.ToString + " -w " +
+                CameraParameters.Width.ToString + " -n -t 999999999 -k " + CameraParameters.Options + "-o -"
             _prc.StartInfo.RedirectStandardError = False
             _prc.StartInfo.RedirectStandardInput = True
             _prc.StartInfo.RedirectStandardOutput = True

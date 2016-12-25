@@ -6,9 +6,10 @@ End Enum
 Public Interface IRpiCam
     Event FrameReady(source As IRpiCam)
 
-    Sub Open(width As Integer, height As Integer, fps As Integer, options As String)
+    Sub Open()
     Sub Close()
 
+    ReadOnly Property CameraParameters As CameraParameters
     ReadOnly Property FrameCounter As Integer
     ReadOnly Property FrameBytesBuffer As Byte()
     ReadOnly Property FrameBytesLength As Integer

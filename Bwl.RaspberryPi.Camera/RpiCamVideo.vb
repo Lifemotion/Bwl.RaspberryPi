@@ -7,7 +7,7 @@ Public Class RpiCamVideo
 
     Public Event FrameReady(source As IRpiCam) Implements IRpiCam.FrameReady
     Public ReadOnly Property FrameCounter As Integer Implements IRpiCam.FrameCounter
-
+    Public ReadOnly Property CameraParameters As New CameraParameters Implements IRpiCam.CameraParameters
     Public ReadOnly Property FrameBytesSynclock As New Object Implements IRpiCam.FrameBytesSynclock
     Public ReadOnly Property FrameBytesBuffer As Byte() = New Byte(1024 * 512) {} Implements IRpiCam.FrameBytesBuffer
     Public ReadOnly Property FrameBytesFormat As RpiCamFrameType = RpiCamFrameType.jpg Implements IRpiCam.FrameBytesFormat
@@ -22,20 +22,19 @@ Public Class RpiCamVideo
 
     End Sub
 
-    Public Sub Open(width As Integer, height As Integer, fps As Integer, options As String) Implements IRpiCam.Open
+    Public Sub Open() Implements IRpiCam.Open
         Close()
 
         If System.Environment.OSVersion.Platform = PlatformID.Unix Then
             _prc = New Process
             _prc.StartInfo.FileName = "raspivid"
-            Dim args = "-cd MJPEG -h " + height.ToString + " -w " + width.ToString
-            If fps > 0 Then
-                args += " -fps " + fps.ToString
-            End If
+            Dim args = "-cd MJPEG -h " + CameraParameters.Height.ToString + " -w " + CameraParameters.Width.ToString
+            If CameraParameters.FPS > 0 Then args += " -fps " + CameraParameters.FPS.ToString
+            If CameraParameters.Shutter > 0 Then args += " -ss " + CameraParameters.Shutter.ToString
+            If CameraParameters.ISO > 0 Then args += " -ISO " + CameraParameters.ISO.ToString
             args += " -n -t 999999999"
-            If options IsNot Nothing AndAlso options > "" Then
-                args += " " + options
-            End If
+            If CameraParameters.Options > "" Then args += " " + CameraParameters.Options
+
             args += " -o -"
             _prc.StartInfo.Arguments = args
             _prc.StartInfo.RedirectStandardError = False
