@@ -13,7 +13,7 @@ Module App
     Public Sub TestTransmission()
         Dim client As New TCPTransport
         AddHandler client.ReceivedPacket, AddressOf ReceivedPacketHandler
-        client.Open("20.20.25.100:8042", "")
+        client.Open("192.168.0.112:8042", "")
         Do
             Dim time = Now
             Dim size = 0.0

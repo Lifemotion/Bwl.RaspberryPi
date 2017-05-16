@@ -8,6 +8,8 @@ Public Class Receiver
     End Sub
 
     Private Sub ReceivedPacketHandler(packet As BytePacket)
+        Dim speed = packet.Bytes.Length / 1024 / 1024
+        Me.Invoke(Sub() Me.Text = "Receiving: " + speed.ToString("0.00") + "Mb per frame")
         Try
             IO.File.WriteAllBytes(Now.Ticks.ToString + ".jpg", packet.Bytes)
             Dim bmp As New Bitmap(New IO.MemoryStream(packet.Bytes))
