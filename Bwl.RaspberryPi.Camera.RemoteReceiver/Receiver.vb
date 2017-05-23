@@ -1,29 +1,7 @@
 ﻿Imports Bwl.Network.Transport
 
 Public Class Receiver
-    Private WithEvents _listener As New TCPServer(8042)
-
-    Private Sub _listener_NewConnection(server As IPortListener, transport As IPacketTransport) Handles _listener.NewConnection
-        AddHandler transport.ReceivedPacket, AddressOf ReceivedPacketHandler
-    End Sub
-
-    Private Sub ReceivedPacketHandler(packet As BytePacket)
-        Dim speed = packet.Bytes.Length / 1024 / 1024
-        Me.Invoke(Sub() Me.Text = "Receiving: " + speed.ToString("0.00") + "Mb per frame")
-        Try
-            IO.File.WriteAllBytes(Now.Ticks.ToString + ".jpg", packet.Bytes)
-            Dim bmp As New Bitmap(New IO.MemoryStream(packet.Bytes))
-            Me.Invoke(Sub()
-                          pbFrame.Image = bmp
-                          pbFrame.Refresh()
-                      End Sub)
-        Catch ex As Exception
-        End Try
-    End Sub
-
-    Private Sub Receiver_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-
-    End Sub
+    Private WithEvents _client As New TCPChannel
 
     Private Sub bSendParameters_Click(sender As Object, e As EventArgs) Handles bSendParameters.Click
         Dim sbp As New StructuredPacket
@@ -33,13 +11,75 @@ Public Class Receiver
         sbp.Add("Shutter", CInt(tbShutter.Text))
         sbp.Add("ISO", CInt(tbISO.Text))
         sbp.Add("Options", tbOptions.Text)
+        sbp.Add("BitRateMbps", CInt(tbBitrate.Text))
         Dim bp = sbp.ToBytePacket
+        Try
+            _client.SendPacket(bp)
+        Catch ex As Exception
+        End Try
+    End Sub
 
-        For Each conn In _listener.ActiveConnections
-            Try
-                conn.SendPacket(bp)
-            Catch ex As Exception
-            End Try
-        Next
+    Private Sub _client_PacketReceived(channel As IPacketChannel, packet As BytePacket) Handles _client.PacketReceived
+        Dim speed = packet.Bytes.Length / 1024 / 1024
+        Try
+            Dim bmp As New Bitmap(New IO.MemoryStream(packet.Bytes))
+            Me.Invoke(Sub()
+                          Me.Text = "Receiving: " + speed.ToString("0.00") + "Mb per frame, Bitrate: " + (speed * 8 * CInt(tbFPS.Text)).ToString("0.0") + "Mbit\s"
+                          If cbWriteFrames.Checked Then
+                              If tbWriteFramesPath.Text = "" Then tbWriteFramesPath.Text = "-"
+                              Dim path = IO.Path.Combine(Application.StartupPath, "..", "data", tbWriteFramesPath.Text)
+                              If IO.Directory.Exists(path) = False Then IO.Directory.CreateDirectory(path)
+                              path = IO.Path.Combine(path, Now.Ticks.ToString + ".jpg")
+                              IO.File.WriteAllBytes(path, packet.Bytes)
+                          End If
+                          pbFrame.Image = bmp
+                          pbFrame.Refresh()
+                      End Sub)
+        Catch ex As Exception
+        End Try
+    End Sub
+
+    Private Sub bConnect_Click(sender As Object, e As EventArgs) Handles bConnect.Click
+        Try
+            _client.Open(tbServerAddress.Text, "")
+        Catch ex As Exception
+
+        End Try
+    End Sub
+
+    Private Sub Receiver_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Dim thr As New Threading.Thread(Sub()
+                                            Do
+
+                                                If _client.IsConnected = False Then
+                                                    Dim results As TransportNetFinder.NetBeaconInfo() = {}
+                                                    Try
+                                                        results = TransportNetFinder.Find(1000)
+                                                        Threading.Thread.Sleep(1000)
+                                                    Catch ex As Exception
+                                                        Threading.Thread.Sleep(100)
+                                                    End Try
+                                                    For Each result In results
+                                                        If result.Name.Contains("Bwl RPi Camera Test") Then
+                                                            Try
+                                                                Me.Invoke(Sub()
+                                                                              tbServerAddress.Text = result.Address + ":" + result.Port.ToString
+                                                                              bConnect_Click(Nothing, Nothing)
+                                                                          End Sub)
+                                                            Catch ex As Exception
+
+                                                            End Try
+                                                        End If
+                                                    Next
+                                                End If
+                                            Loop
+                                        End Sub)
+        thr.IsBackground = True
+        thr.Start()
+    End Sub
+
+    Private Sub Receiver_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
+        _client.Close()
+        End
     End Sub
 End Class

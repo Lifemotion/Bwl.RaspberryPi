@@ -32,6 +32,7 @@ Public Class RpiCamVideo
             If CameraParameters.FPS > 0 Then args += " -fps " + CameraParameters.FPS.ToString
             If CameraParameters.Shutter > 0 Then args += " -ss " + CameraParameters.Shutter.ToString
             If CameraParameters.ISO > 0 Then args += " -ISO " + CameraParameters.ISO.ToString
+            If CameraParameters.BitRateMbps > 0 Then args += " -b " + CameraParameters.BitRateMbps.ToString + "000000"
             args += " -n -t 999999999"
             If CameraParameters.Options > "" Then args += " " + CameraParameters.Options
 

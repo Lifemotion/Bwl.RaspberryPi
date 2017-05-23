@@ -22,19 +22,19 @@ Bwl.Network.Transport
   обращений к ресурсу с помощью этого класса ресурса со строгой типизацией.
 </summary>
 </member>
-<member name="T:Bwl.Network.Transport.TCPTransport">
+<member name="T:Bwl.Network.Transport.TCPChannel">
  <summary>
  TCP-based Packet Transport with big packets support, sync or async sending.
  If SendPacket completed (no exception), it means packet fully sent and fully received by other side.
  </summary>
 </member>
-<member name="T:Bwl.Network.Transport.UDPTransportSimple">
+<member name="T:Bwl.Network.Transport.UDPChannelSimple">
  <summary>
  UDP-based Packet Transport with only protocol-based features. Packet length must be less than 64k, no acknowledgments, only async sending.
  If SendPacket completed (no exception), it means that packet is sent, but no information about delivery status.
  </summary>
 </member>
-<member name="T:Bwl.Network.Transport.UDPTransport">
+<member name="T:Bwl.Network.Transport.UDPChannel">
  <summary>
  UDP-based Packet Transport with big packets support, acknowledgments, retransmits, sync or async sending.
  If SendPacket completed (no exception), it means packet fully sent and fully received by other side.

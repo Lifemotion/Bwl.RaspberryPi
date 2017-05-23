@@ -11,9 +11,11 @@ Module App
     End Sub
 
     Public Sub TestTransmission()
-        Dim client As New TCPTransport
-        AddHandler client.ReceivedPacket, AddressOf ReceivedPacketHandler
-        client.Open("192.168.0.112:8042", "")
+        Dim server As New TCPServer
+        AddHandler server.ServerReceivedPacket, AddressOf ReceivedPacketHandler
+        server.Open(8042)
+        server.StartBeacon("Bwl RPi Camera Test", False)
+        Console.WriteLine("Started Net Server")
         Do
             Dim time = Now
             Dim size = 0.0
@@ -22,7 +24,12 @@ Module App
                 size += cam.FrameBytesLength
                 Dim bytes = cam.CreateBytesCopy
                 Dim pkt As New BytePacket(bytes)
-                client.SendPacket(pkt)
+                For Each conn In server.ActiveConnections
+                    Try
+                        conn.Channel.SendPacket(pkt)
+                    Catch ex As Exception
+                    End Try
+                Next
             Next
             Dim MS = (Now - time).TotalMilliseconds / 10
             Dim fps = (1000 / MS)
@@ -30,7 +37,7 @@ Module App
         Loop
     End Sub
 
-    Private Sub ReceivedPacketHandler(packet As BytePacket)
+    Private Sub ReceivedPacketHandler(connection As IConnectedChannel, packet As BytePacket)
         Console.WriteLine("Received!")
         Dim sbp = New StructuredPacket(packet)
         cam.CameraParameters.Width = sbp.Parts("Width")
@@ -39,6 +46,7 @@ Module App
         cam.CameraParameters.ISO = sbp.Parts("ISO")
         cam.CameraParameters.Options = sbp.Parts("Options")
         cam.CameraParameters.FPS = sbp.Parts("FPS")
+        cam.CameraParameters.BitRateMbps = sbp.Parts("BitRateMbps")
         cam.Open()
     End Sub
 
