@@ -1,4 +1,4 @@
-1. Write image 2016-05-27-raspbian-jessie-lite to SDcard with ImageWriter (Win32DiskImager)
+1. Write image 2017-09-07-raspbian-stretch-lite.img (with Win32DiskImager)
 2. Mount with ExtFS for Windows, edit /etc/wpa_supplicant/wpa_supplicant.conf, add lines:
 network={
 ssid="YOUR_NETWORK_NAME"
@@ -10,22 +10,22 @@ psk="YOUR_NETWORK_PASSWORD"
 6. Check internet with "ping 8.8.8.8"
 7. Update packages with "sudo apt-get update"
 8. Upgrade packages with "sudo apt-get upgrade"
-9. Install basic soft with "sudo apt-get install git mc"
+9. Install basic soft with "sudo apt-get install git mc dirmngr"
 10. Install latest Mono with commands:
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list
+echo "deb http://download.mono-project.com/repo/debian raspbianjessie main" | sudo tee /etc/apt/sources.list.d/mono-official.list
 sudo apt-get update
 sudo apt-get install mono-complete mono-basic-dbg mono-dbg mono-runtime-dbg
-11. Check Mono with "mono -V"
+11. Check Mono with "mono -V". Must be > 5.2
 12. Clone RunMonitor Host Control with "git clone https://github.com/Lifemotion/rmhc.git"
-13. Change directory with "cd host-control-service/bin"
-14. Start RMHC with "mono Bwl.Tools.RunMonitorPlatform.HostControl.exe localserver=8064=LinuxPC remoteapp"
+13. Change directory with "cd rmhc/bin"
+14. Start RMHC with "mono Bwl.Tools.RunMonitorPlatform.HostControl.exe localserver=8064 remoteapp"
 15. Start RunMonitor Host Client on PC, use "Find local servers" to find RPi
 16. Connect to RPi RHMC
 17. Use Start shell 
 18. Check shell works with "mono -V" inside RemoteCmd window.
 19. Check free space: df -Bm 
-20. Copy 2 *.sh files from host-control-service/script/debian-autorun to /home/pi
+20. Copy 2 *.sh files from rmhc/script/debian-autorun to /home/pi
 21. Run Midnight Commander with "mc", check execution rights for .sh with File->Chmod
 22. Change crontab with "sudo crontab -e", add line:
 @reboot /home/pi/autostart.sh
