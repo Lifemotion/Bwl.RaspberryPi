@@ -1,13 +1,11 @@
 1. Write image 2017-09-07-raspbian-stretch-lite.img (with Win32DiskImager)
-2. Mount with ExtFS for Windows, edit /etc/wpa_supplicant/wpa_supplicant.conf, add lines:
-network={
-ssid="YOUR_NETWORK_NAME"
-psk="YOUR_NETWORK_PASSWORD"
-}
+2. Open partition "boot" with file explorer, create file "ssh" (no extension) to auto-enable SSH.
 3. Safe unmount volume & safe remove sdcard
 4. Run Raspberry Pi
-5. Login to Raspberry from PC with hostname "raspberry", login "pi", password "raspberry"
+5. Login wia SSH to Raspberry from PC with hostname "raspberry" or IP, login "pi", password "raspberry"
 6. Check internet with "ping 8.8.8.8"
+7. Set password with "sudo passwd pi" (default for RMHC image: "pi")
+8. Enable Camera with "sudo raspi-config", Interfacing -> Camera - > Yes
 7. Update packages with "sudo apt-get update"
 8. Upgrade packages with "sudo apt-get upgrade"
 9. Install basic soft with "sudo apt-get install git mc dirmngr"
@@ -18,15 +16,44 @@ sudo apt-get update
 sudo apt-get install mono-complete mono-basic-dbg mono-dbg mono-runtime-dbg
 11. Check Mono with "mono -V". Must be > 5.2
 12. Clone RunMonitor Host Control with "git clone https://github.com/Lifemotion/rmhc.git"
-13. Change directory with "cd rmhc/bin"
-14. Start RMHC with "mono Bwl.Tools.RunMonitorPlatform.HostControl.exe localserver=8064 remoteapp"
+14. Start RMHC with "mono rmhc/bin/Bwl.Tools.RunMonitorPlatform.HostControl.exe localserver=8064 remoteapp"
 15. Start RunMonitor Host Client on PC, use "Find local servers" to find RPi
 16. Connect to RPi RHMC
 17. Use Start shell 
 18. Check shell works with "mono -V" inside RemoteCmd window.
 19. Check free space: df -Bm 
-20. Copy 2 *.sh files from rmhc/script/debian-autorun to /home/pi
-21. Run Midnight Commander with "mc", check execution rights for .sh with File->Chmod
+
+AUTORUN RMHC with NO GUI
+20. Run Midnight Commander with "mc", copy 2 *.sh files from rmhc/script/debian-autorun to /home/pi
+21. With Midnight Commander, check execution rights for .sh with File->Chmod
 22. Change crontab with "sudo crontab -e", add line:
 @reboot /home/pi/autostart.sh
-23. Reboot RPi, check autorun works.
+23. Reboot RPi ("sudo reboot"), check check autorun works with RunMonitor Host Client on PC.
+
+AUTORUN RMHC with GUI (openbox)
+24. Install openbox Windows Manager with: "sudo apt-get install xorg openbox slim"
+25. Open /etc/slim.conf with "sudo nano /etc/slim.conf", add lines (or uncomment and change existing):
+default_user        pi
+auto_login          yes
+26. Add autostart RMHC inside openbox with:
+"mkdir /home/pi/.config/openbox"
+"echo "xset -dpms s off;bash rmhc-loop.sh" > /home/pi/.config/openbox/autostart"
+27. Open autorun file with "nano /home/pi/autostart.sh", comment line "sudo -u pi bash rmhc-loop.sh &"
+28. Reboot , check check autorun works with RunMonitor Host Client on PC.
+
+SWITCH to NO GUI mode:
+A1. Connect to RPi with SSH, execute "sudo systemctl set-default multi-user.target"
+A2. With "nano /home/pi/autostart.sh" UNCOMMENT in /home/pi/autostart.sh line "sudo -u pi bash rmhc-loop.sh &"
+
+SWITCH to GUI mode:
+B1. Connect to RPi with SSH, execute "sudo systemctl set-default graphical.target"
+B2. With "nano /home/pi/autostart.sh" COMMENT in /home/pi/autostart.sh line "sudo -u pi bash rmhc-loop.sh &"
+
+SETUP WI-FI from Windows
+C1. Mount SD-card with ExtFS for Windows, 
+C2. Edit /etc/wpa_supplicant/wpa_supplicant.conf, add lines:
+network={
+ssid="YOUR_NETWORK_NAME"
+psk="YOUR_NETWORK_PASSWORD"
+}
+C3. Unmount volume in ExtFS for Windows, safe remove sdcard
