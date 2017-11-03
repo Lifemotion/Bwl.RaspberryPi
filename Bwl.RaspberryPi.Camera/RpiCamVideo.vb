@@ -47,9 +47,37 @@ Public Class RpiCamVideo
             _readThread = New Threading.Thread(AddressOf ReadingThread)
             _readThread.Start()
         Else
-            Throw New Exception("Not implemented on Windows")
+            _readThread = New Threading.Thread(AddressOf ReadingThreadEmulator)
+            _readThread.Start()
         End If
 
+    End Sub
+
+    Private Sub ReadingThreadEmulator()
+        Dim frame1 = My.Resources.emulator1
+        Dim frame2 = My.Resources.emulator2
+
+        Do
+            Try
+                SyncLock FrameBytesSynclock
+                    If FrameCounter Mod 2 = 0 Then
+                        _FrameBytesLength = frame1.Length
+                        Array.Copy(frame1, FrameBytesBuffer, FrameBytesLength)
+                    Else
+                        _FrameBytesLength = frame2.Length
+                        Array.Copy(frame2, FrameBytesBuffer, FrameBytesLength)
+                    End If
+                    _FrameCounter += 1
+                End SyncLock
+                RaiseEvent FrameReady(Me)
+                Dim fps = CameraParameters.FPS
+                If fps < 1 Then fps = 20
+                Threading.Thread.Sleep(1000 / fps)
+            Catch ex As Exception
+                Console.WriteLine("Read Thread Emulator error: " + ex.Message)
+            End Try
+            Threading.Thread.Sleep(1)
+        Loop
     End Sub
 
     Private Sub ReadingThread()
