@@ -47,11 +47,13 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Bwl.Framework">
-      <HintPath>..\refs\Bwl.Framework.dll</HintPath>
+    <Reference Include="Bwl.Framework, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\refs\bwl-framework\Bwl.Framework.dll</HintPath>
     </Reference>
-    <Reference Include="bwl.Network.ClientServer">
-      <HintPath>..\refs\bwl.Network.ClientServer.dll</HintPath>
+    <Reference Include="bwl.Network.ClientServer, Version=1.0.15174.5, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\refs\bwl-framework\bwl.Network.ClientServer.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -62,7 +64,6 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
     <Import Include="Microsoft.VisualBasic" />

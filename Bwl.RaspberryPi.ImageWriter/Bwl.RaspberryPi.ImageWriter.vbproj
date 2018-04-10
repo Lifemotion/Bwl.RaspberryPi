@@ -54,7 +54,8 @@
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Bwl.Framework">
+    <Reference Include="Bwl.Framework, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\refs\bwl-framework\Bwl.Framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
