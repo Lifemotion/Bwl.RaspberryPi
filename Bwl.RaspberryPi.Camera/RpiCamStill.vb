@@ -1,4 +1,5 @@
 ﻿Imports System.Diagnostics
+Imports System.Threading
 
 Public Class RpiCamStill
     Implements IDisposable
@@ -11,7 +12,21 @@ Public Class RpiCamStill
     Public ReadOnly Property FrameBytesSynclock As New Object Implements IRpiCam.FrameBytesSynclock
     Public ReadOnly Property FrameBytesBuffer As Byte() = {} Implements IRpiCam.FrameBytesBuffer
     Public ReadOnly Property FrameBytesFormat As RpiCamFrameType = RpiCamFrameType.bmp Implements IRpiCam.FrameBytesFormat
-    Public ReadOnly Property FrameCounter As Integer Implements IRpiCam.FrameCounter
+
+    Private _frameCounter As Long
+    Public ReadOnly Property FrameCounter As Long Implements IRpiCam.FrameCounter
+        Get
+            Return Interlocked.Read(_frameCounter)
+        End Get
+    End Property
+
+    Private _restartCounter As Integer
+    Public ReadOnly Property RestartCounter As Integer Implements IRpiCam.RestartCounter
+        Get
+            Return Interlocked.Read(_restartCounter)
+        End Get
+    End Property
+
     Public ReadOnly Property CameraParameters As New CameraParameters Implements IRpiCam.CameraParameters
 
     Public ReadOnly Property FrameBytesLength As Integer Implements IRpiCam.FrameBytesLength
@@ -57,7 +72,7 @@ Public Class RpiCamStill
                 If totalBytes < FrameBytesBuffer.Length Then
                     Throw New Exception("Buffer not full, capture failed")
                 Else
-                    _FrameCounter += 1
+                    Interlocked.Increment(_frameCounter)
                 End If
             Else
                 Throw New Exception("Not implemented on Windows")

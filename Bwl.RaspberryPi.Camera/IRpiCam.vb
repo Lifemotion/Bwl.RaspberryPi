@@ -10,7 +10,8 @@ Public Interface IRpiCam
     Sub Close()
 
     ReadOnly Property CameraParameters As CameraParameters
-    ReadOnly Property FrameCounter As Integer
+    ReadOnly Property FrameCounter As Long
+    ReadOnly Property RestartCounter As Integer
     ReadOnly Property FrameBytesBuffer As Byte()
     ReadOnly Property FrameBytesLength As Integer
     ReadOnly Property FrameBytesFormat As RpiCamFrameType

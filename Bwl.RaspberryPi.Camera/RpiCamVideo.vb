@@ -1,12 +1,26 @@
 ﻿Imports System.Diagnostics
 Imports System.IO
+Imports System.Threading
 
 Public Class RpiCamVideo
     Implements IDisposable
     Implements IRpiCam
 
     Public Event FrameReady(source As IRpiCam) Implements IRpiCam.FrameReady
-    Public ReadOnly Property FrameCounter As Integer Implements IRpiCam.FrameCounter
+
+    Private _frameCounter As Long
+    Public ReadOnly Property FrameCounter As Long Implements IRpiCam.FrameCounter
+        Get
+            Return Interlocked.Read(_frameCounter)
+        End Get
+    End Property
+
+    Private _restartCounter As Integer
+    Public ReadOnly Property RestartCounter As Integer Implements IRpiCam.RestartCounter
+        Get
+            Return Interlocked.Read(_restartCounter)
+        End Get
+    End Property
     Public ReadOnly Property CameraParameters As New CameraParameters Implements IRpiCam.CameraParameters
     Public ReadOnly Property FrameBytesSynclock As New Object Implements IRpiCam.FrameBytesSynclock
     Public ReadOnly Property FrameBytesBuffer As Byte() = New Byte(1024 * 512) {} Implements IRpiCam.FrameBytesBuffer
@@ -50,7 +64,7 @@ Public Class RpiCamVideo
             _readThread = New Threading.Thread(AddressOf ReadingThreadEmulator)
             _readThread.Start()
         End If
-
+        Interlocked.Increment(_restartCounter)
     End Sub
 
     Private Sub ReadingThreadEmulator()
@@ -67,7 +81,7 @@ Public Class RpiCamVideo
                         _FrameBytesLength = frame2.Length
                         Array.Copy(frame2, FrameBytesBuffer, FrameBytesLength)
                     End If
-                    _FrameCounter += 1
+                    Interlocked.Increment(_frameCounter)
                 End SyncLock
                 RaiseEvent FrameReady(Me)
                 Dim fps = CameraParameters.FPS
@@ -125,7 +139,8 @@ Public Class RpiCamVideo
             lastCounterValue = _FrameCounter
             Return
         Else
-            Throw New Exception("Frame not captured in 5 seconds")
+            Open()
+            'Throw New Exception("Frame not captured in 5 seconds")
         End If
     End Sub
 
