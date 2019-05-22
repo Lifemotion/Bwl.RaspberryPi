@@ -98,7 +98,7 @@ Public Class RpiCamStill
             prc.WaitForExit()
         Catch ex As Exception
         End Try
-        Threading.Thread.Sleep(500)
+        Threading.Thread.Sleep(2000)
     End Sub
 
     Public Sub Dispose() Implements IDisposable.Dispose

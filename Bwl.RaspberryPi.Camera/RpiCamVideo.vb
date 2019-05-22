@@ -33,7 +33,6 @@ Public Class RpiCamVideo
     Private _currentFrameBuffer As Byte() = New Byte(1024 * 512) {}
 
     Public Sub New()
-
     End Sub
 
     Public Sub Open() Implements IRpiCam.Open
@@ -112,7 +111,7 @@ Public Class RpiCamVideo
                             SyncLock FrameBytesSynclock
                                 _FrameBytesLength = _currentFramePosition
                                 Array.Copy(_currentFrameBuffer, FrameBytesBuffer, FrameBytesLength)
-                                _FrameCounter += 1
+                                Interlocked.Increment(_frameCounter)
                             End SyncLock
                             RaiseEvent FrameReady(Me)
                         End If
@@ -131,16 +130,24 @@ Public Class RpiCamVideo
 
     Public Sub WaitNewFrame() Implements IRpiCam.CaptureOrWaitFrame
         Static lastCounterValue As Integer
+        Static badRestartCounter As Integer
         Dim start = Now
+        Dim frameCounter As Long
         Do
             Threading.Thread.Sleep(1)
-        Loop While lastCounterValue = _FrameCounter And (Now - start).TotalSeconds < 15
-        If lastCounterValue <> _FrameCounter Then
-            lastCounterValue = _FrameCounter
+            frameCounter = Interlocked.Read(_frameCounter)
+        Loop While lastCounterValue = frameCounter And (Now - start).TotalSeconds < 5
+        If lastCounterValue <> frameCounter Then
+            lastCounterValue = frameCounter
+            badRestartCounter = 0 'Получили кадр, всё нормально
             Return
         Else
-            Open()
-            'Throw New Exception("Frame not captured in 5 seconds")
+            If badRestartCounter < 3 Then
+                badRestartCounter += 1
+                Open()
+            Else
+                Throw New Exception(String.Format("Frame not captured in 5 seconds, restart count without frame: {0}", badRestartCounter))
+            End If
         End If
     End Sub
 
@@ -169,7 +176,7 @@ Public Class RpiCamVideo
         Catch ex As Exception
         End Try
 
-        Threading.Thread.Sleep(500)
+        Threading.Thread.Sleep(2000)
     End Sub
 
     Public Sub Dispose() Implements IDisposable.Dispose
