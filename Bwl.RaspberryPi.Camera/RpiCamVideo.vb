@@ -35,7 +35,11 @@ Public Class RpiCamVideo
     Public Sub New()
     End Sub
 
+    Public ReadOnly Property LastCamOpenTime As DateTime
+
     Public Sub Open() Implements IRpiCam.Open
+        _LastCamOpenTime = Now
+
         Close()
 
         If System.Environment.OSVersion.Platform = PlatformID.Unix Then
