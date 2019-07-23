@@ -42,6 +42,8 @@ Public Class RpiCamVideo
 
         Close()
 
+        Thread.Sleep(2000)
+
         If System.Environment.OSVersion.Platform = PlatformID.Unix Then
             _prc = New Process
             _prc.StartInfo.FileName = "raspivid"
@@ -160,7 +162,10 @@ Public Class RpiCamVideo
     ''' </summary>
     Public Sub Close() Implements IRpiCam.Close
         Try
-            _readThread.Abort()
+            If _readThread IsNot Nothing Then
+                _readThread.Join(2000)
+                _readThread.Abort()
+            End If
         Catch
         End Try
         _readThread = Nothing
