@@ -108,22 +108,25 @@ Public Class RpiCamVideo
                 'Console.WriteLine("readed " + read.ToString)
                 For i = 0 To read - 1
                     If _readBuffer(i + 0) = &HFF AndAlso
-                       _readBuffer(i + 1) = &HD8 AndAlso
-                       _readBuffer(i + 3) = &HE0 AndAlso
-                       _readBuffer(i + 6) = &H4A AndAlso
-                       _readBuffer(i + 7) = &H46 AndAlso
-                       _readBuffer(i + 8) = &H49 Then
-                        If _frameStarted Then
-                            SyncLock FrameBytesSynclock
-                                _FrameBytesLength = _currentFramePosition
-                                Array.Copy(_currentFrameBuffer, FrameBytesBuffer, FrameBytesLength)
-                                Interlocked.Increment(_frameCounter)
-                            End SyncLock
-                            RaiseEvent FrameReady(Me)
-                        End If
+                       _readBuffer(i + 1) = &HD8 Then
 
-                        _frameStarted = True
-                        _currentFramePosition = 0
+                        ' If _readBuffer(i + 3) = &HE0 AndAlso
+                        '  _readBuffer(i + 6) = &H4A AndAlso
+                        ' _readBuffer(i + 7) = &H46 AndAlso
+                        ' _readBuffer(i + 8) = &H49 Then
+
+                        If _frameStarted Then
+                                SyncLock FrameBytesSynclock
+                                    _FrameBytesLength = _currentFramePosition
+                                    Array.Copy(_currentFrameBuffer, FrameBytesBuffer, FrameBytesLength)
+                                    Interlocked.Increment(_frameCounter)
+                                End SyncLock
+                                RaiseEvent FrameReady(Me)
+                            End If
+
+                            _frameStarted = True
+                            _currentFramePosition = 0
+                        ' End If
                     End If
                     _currentFrameBuffer(_currentFramePosition) = _readBuffer(i)
                     _currentFramePosition += 1
