@@ -25,6 +25,8 @@ Partial Class Receiver
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Receiver))
         Me.pbFrame = New System.Windows.Forms.PictureBox()
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
+        Me.Label7 = New System.Windows.Forms.Label()
+        Me.tbBitrate = New System.Windows.Forms.TextBox()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.tbOptions = New System.Windows.Forms.TextBox()
         Me.Label5 = New System.Windows.Forms.Label()
@@ -41,11 +43,11 @@ Partial Class Receiver
         Me.GroupBox2 = New System.Windows.Forms.GroupBox()
         Me.bConnect = New System.Windows.Forms.Button()
         Me.tbServerAddress = New System.Windows.Forms.TextBox()
-        Me.Label7 = New System.Windows.Forms.Label()
-        Me.tbBitrate = New System.Windows.Forms.TextBox()
         Me.GroupBox3 = New System.Windows.Forms.GroupBox()
-        Me.tbWriteFramesPath = New System.Windows.Forms.TextBox()
         Me.cbWriteFrames = New System.Windows.Forms.CheckBox()
+        Me.tbWriteFramesPath = New System.Windows.Forms.TextBox()
+        Me.Label8 = New System.Windows.Forms.Label()
+        Me.tbQuality = New System.Windows.Forms.TextBox()
         CType(Me.pbFrame, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.GroupBox1.SuspendLayout()
         Me.GroupBox2.SuspendLayout()
@@ -68,6 +70,8 @@ Partial Class Receiver
         '
         'GroupBox1
         '
+        Me.GroupBox1.Controls.Add(Me.tbQuality)
+        Me.GroupBox1.Controls.Add(Me.Label8)
         Me.GroupBox1.Controls.Add(Me.Label7)
         Me.GroupBox1.Controls.Add(Me.tbBitrate)
         Me.GroupBox1.Controls.Add(Me.Label4)
@@ -92,22 +96,41 @@ Partial Class Receiver
         Me.GroupBox1.TabStop = False
         Me.GroupBox1.Text = "Camera Parameters:"
         '
+        'Label7
+        '
+        Me.Label7.AutoSize = True
+        Me.Label7.Location = New System.Drawing.Point(266, 45)
+        Me.Label7.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label7.Name = "Label7"
+        Me.Label7.Size = New System.Drawing.Size(72, 13)
+        Me.Label7.TabIndex = 14
+        Me.Label7.Text = "Bitrate, Mbps:"
+        '
+        'tbBitrate
+        '
+        Me.tbBitrate.Location = New System.Drawing.Point(343, 42)
+        Me.tbBitrate.Margin = New System.Windows.Forms.Padding(2)
+        Me.tbBitrate.Name = "tbBitrate"
+        Me.tbBitrate.Size = New System.Drawing.Size(76, 20)
+        Me.tbBitrate.TabIndex = 13
+        Me.tbBitrate.Text = "0"
+        '
         'Label4
         '
         Me.Label4.AutoSize = True
         Me.Label4.Location = New System.Drawing.Point(7, 70)
         Me.Label4.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(46, 13)
+        Me.Label4.Size = New System.Drawing.Size(42, 13)
         Me.Label4.TabIndex = 12
-        Me.Label4.Text = "Options:"
+        Me.Label4.Text = "Quality:"
         '
         'tbOptions
         '
-        Me.tbOptions.Location = New System.Drawing.Point(56, 67)
+        Me.tbOptions.Location = New System.Drawing.Point(184, 67)
         Me.tbOptions.Margin = New System.Windows.Forms.Padding(2)
         Me.tbOptions.Name = "tbOptions"
-        Me.tbOptions.Size = New System.Drawing.Size(363, 20)
+        Me.tbOptions.Size = New System.Drawing.Size(235, 20)
         Me.tbOptions.TabIndex = 11
         '
         'Label5
@@ -244,25 +267,6 @@ Partial Class Receiver
         Me.tbServerAddress.Size = New System.Drawing.Size(185, 20)
         Me.tbServerAddress.TabIndex = 2
         '
-        'Label7
-        '
-        Me.Label7.AutoSize = True
-        Me.Label7.Location = New System.Drawing.Point(266, 45)
-        Me.Label7.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
-        Me.Label7.Name = "Label7"
-        Me.Label7.Size = New System.Drawing.Size(72, 13)
-        Me.Label7.TabIndex = 14
-        Me.Label7.Text = "Bitrate, Mbps:"
-        '
-        'tbBitrate
-        '
-        Me.tbBitrate.Location = New System.Drawing.Point(343, 42)
-        Me.tbBitrate.Margin = New System.Windows.Forms.Padding(2)
-        Me.tbBitrate.Name = "tbBitrate"
-        Me.tbBitrate.Size = New System.Drawing.Size(76, 20)
-        Me.tbBitrate.TabIndex = 13
-        Me.tbBitrate.Text = "0"
-        '
         'GroupBox3
         '
         Me.GroupBox3.Controls.Add(Me.cbWriteFrames)
@@ -274,15 +278,6 @@ Partial Class Receiver
         Me.GroupBox3.TabStop = False
         Me.GroupBox3.Text = "Save Frames"
         '
-        'tbWriteFramesPath
-        '
-        Me.tbWriteFramesPath.Location = New System.Drawing.Point(5, 38)
-        Me.tbWriteFramesPath.Margin = New System.Windows.Forms.Padding(2)
-        Me.tbWriteFramesPath.Name = "tbWriteFramesPath"
-        Me.tbWriteFramesPath.Size = New System.Drawing.Size(185, 20)
-        Me.tbWriteFramesPath.TabIndex = 2
-        Me.tbWriteFramesPath.Text = "frames0"
-        '
         'cbWriteFrames
         '
         Me.cbWriteFrames.AutoSize = True
@@ -292,6 +287,34 @@ Partial Class Receiver
         Me.cbWriteFrames.TabIndex = 4
         Me.cbWriteFrames.Text = "Write Frames To Folder:"
         Me.cbWriteFrames.UseVisualStyleBackColor = True
+        '
+        'tbWriteFramesPath
+        '
+        Me.tbWriteFramesPath.Location = New System.Drawing.Point(5, 38)
+        Me.tbWriteFramesPath.Margin = New System.Windows.Forms.Padding(2)
+        Me.tbWriteFramesPath.Name = "tbWriteFramesPath"
+        Me.tbWriteFramesPath.Size = New System.Drawing.Size(185, 20)
+        Me.tbWriteFramesPath.TabIndex = 2
+        Me.tbWriteFramesPath.Text = "frames0"
+        '
+        'Label8
+        '
+        Me.Label8.AutoSize = True
+        Me.Label8.Location = New System.Drawing.Point(136, 70)
+        Me.Label8.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
+        Me.Label8.Name = "Label8"
+        Me.Label8.Size = New System.Drawing.Size(46, 13)
+        Me.Label8.TabIndex = 15
+        Me.Label8.Text = "Options:"
+        '
+        'tbQuality
+        '
+        Me.tbQuality.Location = New System.Drawing.Point(56, 66)
+        Me.tbQuality.Margin = New System.Windows.Forms.Padding(2)
+        Me.tbQuality.Name = "tbQuality"
+        Me.tbQuality.Size = New System.Drawing.Size(76, 20)
+        Me.tbQuality.TabIndex = 16
+        Me.tbQuality.Text = "0"
         '
         'Receiver
         '
@@ -339,4 +362,6 @@ Partial Class Receiver
     Friend WithEvents GroupBox3 As GroupBox
     Friend WithEvents cbWriteFrames As CheckBox
     Friend WithEvents tbWriteFramesPath As TextBox
+    Friend WithEvents tbQuality As TextBox
+    Friend WithEvents Label8 As Label
 End Class

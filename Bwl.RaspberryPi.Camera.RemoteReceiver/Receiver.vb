@@ -12,6 +12,7 @@ Public Class Receiver
         sbp.Add("ISO", CInt(tbISO.Text))
         sbp.Add("Options", tbOptions.Text)
         sbp.Add("BitRateMbps", CInt(tbBitrate.Text))
+        sbp.Add("Quality", CInt(tbQuality.Text))
         Dim bp = sbp.ToBytePacket
         Try
             _client.SendPacket(bp)

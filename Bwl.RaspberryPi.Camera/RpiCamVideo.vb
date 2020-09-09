@@ -202,4 +202,8 @@ Public Class RpiCamVideo
             Return bytes
         End SyncLock
     End Function
+    Public Sub Reconfigure() Implements IRpiCam.Reconfigure
+        Open()
+    End Sub
+
 End Class

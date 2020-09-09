@@ -20,5 +20,7 @@ Public Interface IRpiCam
     Function CreateBytesCopy() As Byte()
 
     Sub CaptureOrWaitFrame()
+
+    Sub Reconfigure()
 End Interface
 

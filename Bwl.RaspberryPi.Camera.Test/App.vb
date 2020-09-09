@@ -2,7 +2,7 @@
 Imports Bwl.Network.Transport
 
 Module App
-    Dim cam As IRpiCam = New RpiCamVideo
+    Dim cam As IRpiCam = New RpiCamMMAL
     <STAThread>
     Sub Main()
         cam.Open()
@@ -40,14 +40,41 @@ Module App
     Private Sub ReceivedPacketHandler(connection As IConnectedChannel, packet As BytePacket)
         Console.WriteLine("Received!")
         Dim sbp = New StructuredPacket(packet)
-        cam.CameraParameters.Width = sbp.Parts("Width")
-        cam.CameraParameters.Height = sbp.Parts("Height")
-        cam.CameraParameters.Shutter = sbp.Parts("Shutter")
-        cam.CameraParameters.ISO = sbp.Parts("ISO")
-        cam.CameraParameters.Options = sbp.Parts("Options")
-        cam.CameraParameters.FPS = sbp.Parts("FPS")
-        cam.CameraParameters.BitRateMbps = sbp.Parts("BitRateMbps")
-        cam.Open()
+
+        If cam.GetType() Is GetType(RpiCamMMAL) Then
+            If cam.CameraParameters.Shutter <> sbp.Parts("Shutter") Or
+                cam.CameraParameters.ISO <> sbp.Parts("ISO") Then
+
+                cam.CameraParameters.Shutter = sbp.Parts("Shutter")
+                cam.CameraParameters.ISO = sbp.Parts("ISO")
+                cam.Reconfigure()
+            End If
+
+            If cam.CameraParameters.Width <> sbp.Parts("Width") Or
+                cam.CameraParameters.Height <> sbp.Parts("Height") Or
+                cam.CameraParameters.FPS <> sbp.Parts("FPS") Or
+                cam.CameraParameters.Options <> sbp.Parts("Options") Or
+                cam.CameraParameters.Quality <> sbp.Parts("Quality") Or
+                cam.CameraParameters.BitRateMbps <> sbp.Parts("BitRateMbps") Then
+
+                cam.CameraParameters.Width = sbp.Parts("Width")
+                cam.CameraParameters.Height = sbp.Parts("Height")
+                cam.CameraParameters.FPS = sbp.Parts("FPS")
+                cam.CameraParameters.Options = sbp.Parts("Options")
+                cam.CameraParameters.Quality = sbp.Parts("Quality")
+                cam.CameraParameters.BitRateMbps = sbp.Parts("BitRateMbps")
+                cam.Open()
+            End If
+        Else
+            cam.CameraParameters.Width = sbp.Parts("Width")
+            cam.CameraParameters.Height = sbp.Parts("Height")
+            cam.CameraParameters.Shutter = sbp.Parts("Shutter")
+            cam.CameraParameters.ISO = sbp.Parts("ISO")
+            cam.CameraParameters.Options = sbp.Parts("Options")
+            cam.CameraParameters.FPS = sbp.Parts("FPS")
+            cam.CameraParameters.BitRateMbps = sbp.Parts("BitRateMbps")
+            cam.Open()
+        End If
     End Sub
 
     Public Sub CreateUserDefinedCamera()

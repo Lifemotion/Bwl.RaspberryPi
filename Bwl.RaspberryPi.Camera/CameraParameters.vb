@@ -6,4 +6,6 @@
     Public Property BitRateMbps As Integer = 0
     Public Property ISO As Integer = 0
     Public Property Options As String = ""
+
+    Public Property Quality As Integer = 0
 End Class
