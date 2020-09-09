@@ -103,9 +103,15 @@ Public Class RpiCamMMAL
                             AddHandler _captureHandler.Ready, AddressOf _captureHandlerReady
 
                             'Console.WriteLine(" w:h " & Me.CameraParameters.Width.ToString() & " : " & Me.CameraParameters.Height.ToString())
-                            If Me.CameraParameters.Width > 0 AndAlso Me.CameraParameters.Height > 0 Then
-                                MMALCameraConfig.VideoResolution = New Resolution(Me.CameraParameters.Width, Me.CameraParameters.Height)
+                            Dim width As Integer = Me.CameraParameters.Width
+                            If width = 0 Then
+                                width = _camera.Camera.CameraInfo.MaxWidth
                             End If
+                            Dim height As Integer = Me.CameraParameters.Height
+                            If height = 0 Then
+                                height = _camera.Camera.CameraInfo.MaxHeight
+                            End If
+                            MMALCameraConfig.VideoResolution = New Resolution(width, height)
                             'Console.WriteLine(" iso " & Me.CameraParameters.ISO.ToString())
                             MMALCameraConfig.ISO = Me.CameraParameters.ISO
                             'Console.WriteLine(" shutter speed " & Me.CameraParameters.Shutter.ToString())
@@ -115,9 +121,9 @@ Public Class RpiCamMMAL
 
                             _camera.ConfigureCameraSettings()
 
-                                'Console.WriteLine(" quality " & Me.CameraParameters.Quality.ToString())
-                                'Console.WriteLine(" bitratembps " & Me.CameraParameters.BitRateMbps.ToString())
-                                Dim portConfig = New MMALPortConfig(MMALEncoding.JPEG, MMALEncoding.I420, Me.CameraParameters.Quality, Me.CameraParameters.BitRateMbps * 100000, DateTime.Now.AddSeconds(1))
+                            'Console.WriteLine(" quality " & Me.CameraParameters.Quality.ToString())
+                            'Console.WriteLine(" bitratembps " & Me.CameraParameters.BitRateMbps.ToString())
+                            Dim portConfig = New MMALPortConfig(MMALEncoding.JPEG, MMALEncoding.I420, Me.CameraParameters.Quality, Me.CameraParameters.BitRateMbps * 100000, DateTime.Now.AddSeconds(1))
                             imageEncoder.ConfigureOutputPort(portConfig, captureHandler)
                             _camera.Camera.VideoPort.ConnectTo(splitter)
                             splitter.Outputs(0).ConnectTo(imageEncoder)
