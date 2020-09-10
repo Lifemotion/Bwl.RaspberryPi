@@ -124,10 +124,13 @@ Public Class RpiCamMMAL
                             'Console.WriteLine(" quality " & Me.CameraParameters.Quality.ToString())
                             'Console.WriteLine(" bitratembps " & Me.CameraParameters.BitRateMbps.ToString())
                             Dim portConfig = New MMALPortConfig(MMALEncoding.JPEG, MMALEncoding.I420, Me.CameraParameters.Quality, Me.CameraParameters.BitRateMbps * 100000, DateTime.Now.AddSeconds(1))
+
                             imageEncoder.ConfigureOutputPort(portConfig, captureHandler)
+
+                            _camera.Camera.PreviewPort.ConnectTo(nullSink)
                             _camera.Camera.VideoPort.ConnectTo(splitter)
                             splitter.Outputs(0).ConnectTo(imageEncoder)
-                            _camera.Camera.PreviewPort.ConnectTo(nullSink)
+
                             Await _camera.ProcessAsync(_camera.Camera.VideoPort, _cancellationToken).ConfigureAwait(False)
                         End Using
                     End Using
