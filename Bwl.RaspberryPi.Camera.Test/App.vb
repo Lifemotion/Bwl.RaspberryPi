@@ -2,9 +2,19 @@
 Imports Bwl.Network.Transport
 
 Module App
-    Dim cam As IRpiCam = New RpiCamMMAL
+    Dim cam As IRpiCam '= New RpiCamMMAL
     <STAThread>
-    Sub Main()
+    Sub Main(args() As String)
+        Console.WriteLine("Bwl.RaspberryPi.Camera.TestNetCore")
+        Console.WriteLine("#100")
+        For Each arg In args
+            Select Case arg.ToLower
+                Case "mmal" : cam = New RpiCamMMAL
+                Case "still" : cam = New RpiCamVideo
+                Case "video" : cam = New RpiCamStill
+            End Select
+        Next
+        If cam Is Nothing Then cam = New RpiCamMMAL
         cam.Open()
         TestTransmission()
         cam.Close()
@@ -40,40 +50,28 @@ Module App
     Private Sub ReceivedPacketHandler(connection As IConnectedChannel, packet As BytePacket)
         Console.WriteLine("Received!")
         Dim sbp = New StructuredPacket(packet)
-
-        If cam.GetType() Is GetType(RpiCamMMAL) Then
-            If cam.CameraParameters.Shutter <> sbp.Parts("Shutter") Or
-                cam.CameraParameters.ISO <> sbp.Parts("ISO") Then
-
-                cam.CameraParameters.Shutter = sbp.Parts("Shutter")
-                cam.CameraParameters.ISO = sbp.Parts("ISO")
-                cam.Reconfigure()
-            End If
-
-            If cam.CameraParameters.Width <> sbp.Parts("Width") Or
+        If cam.CameraParameters.Width <> sbp.Parts("Width") Or
                 cam.CameraParameters.Height <> sbp.Parts("Height") Or
                 cam.CameraParameters.FPS <> sbp.Parts("FPS") Or
                 cam.CameraParameters.Options <> sbp.Parts("Options") Or
                 cam.CameraParameters.Quality <> sbp.Parts("Quality") Or
                 cam.CameraParameters.BitRateMbps <> sbp.Parts("BitRateMbps") Then
 
-                cam.CameraParameters.Width = sbp.Parts("Width")
-                cam.CameraParameters.Height = sbp.Parts("Height")
-                cam.CameraParameters.FPS = sbp.Parts("FPS")
-                cam.CameraParameters.Options = sbp.Parts("Options")
-                cam.CameraParameters.Quality = sbp.Parts("Quality")
-                cam.CameraParameters.BitRateMbps = sbp.Parts("BitRateMbps")
-                cam.Open()
-            End If
-        Else
             cam.CameraParameters.Width = sbp.Parts("Width")
             cam.CameraParameters.Height = sbp.Parts("Height")
+            cam.CameraParameters.FPS = sbp.Parts("FPS")
+            cam.CameraParameters.Options = sbp.Parts("Options")
+            cam.CameraParameters.Quality = sbp.Parts("Quality")
+            cam.CameraParameters.BitRateMbps = sbp.Parts("BitRateMbps")
             cam.CameraParameters.Shutter = sbp.Parts("Shutter")
             cam.CameraParameters.ISO = sbp.Parts("ISO")
-            cam.CameraParameters.Options = sbp.Parts("Options")
-            cam.CameraParameters.FPS = sbp.Parts("FPS")
-            cam.CameraParameters.BitRateMbps = sbp.Parts("BitRateMbps")
+            Console.WriteLine("Reopen")
             cam.Open()
+        Else
+            cam.CameraParameters.Shutter = sbp.Parts("Shutter")
+            cam.CameraParameters.ISO = sbp.Parts("ISO")
+            Console.WriteLine("Reconfigure")
+            cam.Reconfigure()
         End If
     End Sub
 

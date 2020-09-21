@@ -64,11 +64,11 @@ Public Class RpiCamStill
                 _prc.StandardOutput.DiscardBufferedData()
                 _prc.StandardInput.Write(vbLf)
 
-                Dim start = DateTime.Now
+                Dim start = Now
                 Dim totalBytes = 0
                 Do
                     totalBytes += _prc.StandardOutput.BaseStream.Read(FrameBytesBuffer, totalBytes, FrameBytesBuffer.Length - totalBytes)
-                Loop While totalBytes < FrameBytesBuffer.Length And (DateTime.Now - start).TotalSeconds < 3
+                Loop While totalBytes < FrameBytesBuffer.Length And (Now - start).TotalSeconds < 3
                 If totalBytes < FrameBytesBuffer.Length Then
                     Throw New Exception("Buffer not full, capture failed")
                 Else

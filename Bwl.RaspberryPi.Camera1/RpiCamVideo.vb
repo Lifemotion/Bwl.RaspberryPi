@@ -38,7 +38,7 @@ Public Class RpiCamVideo
     Public ReadOnly Property LastCamOpenTime As DateTime
 
     Public Sub Open() Implements IRpiCam.Open
-        _LastCamOpenTime = DateTime.Now
+        _LastCamOpenTime = Now
 
         Close()
 
@@ -73,8 +73,9 @@ Public Class RpiCamVideo
     End Sub
 
     Private Sub ReadingThreadEmulator()
-        Dim frame1 As Byte() '= My.Resources.emulator1
-        Dim frame2 As Byte() ' = My.Resources.emulator2
+        Dim frame1 = My.Resources.emulator1
+        Dim frame2 = My.Resources.emulator2
+
         Do
             Try
                 SyncLock FrameBytesSynclock
@@ -139,12 +140,12 @@ Public Class RpiCamVideo
     Public Sub WaitNewFrame() Implements IRpiCam.CaptureOrWaitFrame
         Static lastCounterValue As Integer
         Static badRestartCounter As Integer
-        Dim start = DateTime.Now
+        Dim start = Now
         Dim frameCounter As Long
         Do
             Threading.Thread.Sleep(1)
             frameCounter = Interlocked.Read(_frameCounter)
-        Loop While lastCounterValue = frameCounter And (datetime.Now - start).TotalSeconds < 5
+        Loop While lastCounterValue = frameCounter And (Now - start).TotalSeconds < 5
         If lastCounterValue <> frameCounter Then
             lastCounterValue = frameCounter
             badRestartCounter = 0 'Получили кадр, всё нормально

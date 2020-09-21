@@ -154,12 +154,12 @@ Public Class RpiCamMMAL
     Public Sub WaitNewFrame() Implements IRpiCam.CaptureOrWaitFrame
         Static lastCounterValue As Integer
         Static badRestartCounter As Integer
-        Dim start = DateTime.Now
+        Dim start = Now
         Dim frameCounter As Long
         Do
             Threading.Thread.Sleep(1)
             frameCounter = Interlocked.Read(_frameCounter)
-        Loop While lastCounterValue = frameCounter And (DateTime.Now - start).TotalSeconds < 5
+        Loop While lastCounterValue = frameCounter And (Now - start).TotalSeconds < 5
         If lastCounterValue <> frameCounter Then
             lastCounterValue = frameCounter
             badRestartCounter = 0 'Получили кадр, всё нормально
@@ -205,16 +205,17 @@ Public Class RpiCamMMAL
     End Function
 
     Public Sub Reconfigure() Implements IRpiCam.Reconfigure
+        MMALCameraConfig.ISO = Me.CameraParameters.ISO
+        MMALCameraConfig.ShutterSpeed = Me.CameraParameters.Shutter
         Try
-            Dim asmType = GetType(MMALCameraComponentExtensions)
+            Dim ass = Assembly.LoadFile(My.Application.Info.DirectoryPath & "/" & "MMALSharp.dll")
+            Dim asmType = ass.GetType("MMALSharp.MMALCameraComponentExtensions")
             Dim mi_SetISO = asmType.GetMethod("SetISO", BindingFlags.NonPublic Or BindingFlags.Static)
             Dim mi_SetShutterSpeed = asmType.GetMethod("SetShutterSpeed", BindingFlags.NonPublic Or BindingFlags.Static)
             Dim parameters_SetISO As Object() = {_camera.Camera, Me.CameraParameters.ISO}
             Dim parameters_SetShutterSpeed As Object() = {_camera.Camera, Me.CameraParameters.Shutter}
-            mi_SetISO.Invoke(_camera.Camera, parameters_SetISO)
-            mi_SetShutterSpeed.Invoke(_camera.Camera, parameters_SetShutterSpeed)
-            MMALCameraConfig.ISO = Me.CameraParameters.ISO
-            MMALCameraConfig.ShutterSpeed = Me.CameraParameters.Shutter
+            mi_SetISO.Invoke(Nothing, parameters_SetISO)
+            mi_SetShutterSpeed.Invoke(Nothing, parameters_SetShutterSpeed)
         Catch ex As Exception
             Console.WriteLine("Exception[Reconfigure]: " & ex.Message)
         End Try

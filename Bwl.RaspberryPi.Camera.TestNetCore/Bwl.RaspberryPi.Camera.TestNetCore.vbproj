@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Bwl.RaspberryPi.Camera.TestNetCore</RootNamespace>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\debug\bwl-rpi-cam-test-standard\</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\release\bwl-rpi-cam-test-standard\</OutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Bwl.RaspberryPi.Camera.Test\App.vb" Link="App.vb" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bwl.RaspberryPi.Camera\Bwl.RaspberryPi.Camera.vbproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Bwl.Network.Transport">
+      <HintPath>..\refs\bwl-network-transport-standard\netstandard2.0\Bwl.Network.Transport.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
