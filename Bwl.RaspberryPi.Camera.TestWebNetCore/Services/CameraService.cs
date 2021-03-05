@@ -12,18 +12,20 @@ namespace Bwl.RaspberryPi.Camera.TestWebNetCore.Services
     {
         #region Fields
         private readonly ILogger<CameraService> _logger;
-        private readonly IMemoryCache _memoryCache;
         private readonly IFrameService _frameService;
 
-        private Thread _thread;
+        private RpiCamMMAL _camera = new RpiCamMMAL();
+
+        public Models.Camera Camera { get; private set; }
         #endregion
 
         #region Constructors
-        public CameraService(ILogger<CameraService> logger, IMemoryCache memoryCache, IFrameService frameService)
+        public CameraService(ILogger<CameraService> logger, IFrameService frameService)
         {
             _logger = logger;
-            _memoryCache = memoryCache;
             _frameService = frameService;
+
+            Camera = new Models.Camera();
         }
         #endregion
 
@@ -32,7 +34,6 @@ namespace Bwl.RaspberryPi.Camera.TestWebNetCore.Services
         {
             _logger.LogInformation("Camera Service running.");
 
-            _memoryCache.Set("_Time", DateTime.Now.ToString());
 
             //List<CameraParameters> list = new List<CameraParameters>
             //{
@@ -140,13 +141,17 @@ namespace Bwl.RaspberryPi.Camera.TestWebNetCore.Services
             //};
             //_thread.Start();
 
-            var camera = new RpiCamMMAL();
-            camera.FrameReady += Camera_FrameReady;
-            //camera.CameraParameters.Width = 640;
-            //camera.CameraParameters.Height = 480;
-            //camera.CameraParameters.FPS = 20;
-            //camera.CameraParameters.Options = "";
-            camera.Open();
+            Camera.Width = 640;
+            Camera.Height = 480;
+            Camera.ISO = 0;
+
+            _camera.FrameReady += Camera_FrameReady;            
+            _camera.CameraParameters.Width = Camera.Width;
+            _camera.CameraParameters.Height = Camera.Height;
+            _camera.CameraParameters.ISO = Camera.ISO;
+            //_camera.CameraParameters.FPS = 20;
+            //_camera.CameraParameters.Options = "";
+            _camera.Open();
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -154,7 +159,7 @@ namespace Bwl.RaspberryPi.Camera.TestWebNetCore.Services
                 await Task.Delay(1000, stoppingToken);
             }
 
-            camera.Close();
+            _camera.Close();
         }
 
         private void Camera_FrameReady(IRpiCam source)
@@ -176,6 +181,42 @@ namespace Bwl.RaspberryPi.Camera.TestWebNetCore.Services
             byte[] bytes = camera.CreateBytesCopy();
             _frameService.SetFrame(bytes);
         }
+
+        public void SetParameters(int width, int height, int iso)
+        {
+            Camera.Width = width;
+            Camera.Height = height;
+            Camera.ISO = iso;
+
+            _logger.LogInformation($"Parameters: {Camera.Width}x{Camera.Height} {Camera.ISO}ISO");
+
+            bool needClose = false;
+            if (_camera.CameraParameters.Width != Camera.Width || _camera.CameraParameters.Height != Camera.Height)
+            {
+                needClose = true;
+            }
+            if (needClose)
+            {
+                _camera.Close();
+
+                _camera.CameraParameters.Width = Camera.Width;
+                _camera.CameraParameters.Height = Camera.Height;
+
+                _camera.CameraParameters.ISO = Camera.ISO;
+                //_camera.CameraParameters.FPS = 20;
+                //_camera.CameraParameters.Options = "";    
+
+                _camera.Open();
+            }
+            else
+            {
+                _camera.CameraParameters.ISO = Camera.ISO;
+                //_camera.CameraParameters.FPS = 20;
+                //_camera.CameraParameters.Options = "";
+                _camera.Reconfigure();
+            }
+        }
+
         #endregion
     }
 }

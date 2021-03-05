@@ -10,26 +10,20 @@ using Microsoft.Extensions.Logging;
 
 namespace Bwl.RaspberryPi.Camera.TestWebNetCore.Pages
 {
-    public class StatusModel : PageModel
+    public class CameraModel : PageModel
     {
         private readonly ILogger<IndexModel> _logger;
         private readonly IMemoryCache _memoryCache;
-        private readonly IFrameService _frameService;
-        public StatusModel(ILogger<IndexModel> logger, IMemoryCache memoryCache, IFrameService frameService)
+        public CameraModel(ILogger<IndexModel> logger, IMemoryCache memoryCache)
         {
             _logger = logger;
             _memoryCache = memoryCache;
-            _frameService = frameService;
         }
         public void OnGet()
         {
             string time;
             _memoryCache.TryGetValue("_Time", out time);
             ViewData["Time"] = time;
-
-            ViewData["Count"] = _frameService.Count;
-
-            ViewData["Bytes"] = _frameService.GetFrame();
         }
     }
 }

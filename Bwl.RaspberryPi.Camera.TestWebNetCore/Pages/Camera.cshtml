@@ -1,0 +1,114 @@
+﻿@page
+@model CameraModel
+@{
+    ViewData["Title"] = "Camera";
+}
+
+<div>
+    <h1 class="display-4">@ViewBag.Title</h1>
+    <div class="form-inline">
+        <div class="form-group mb-2">
+            <label for="cameraResolution" class="sr-only">Resolution</label>
+            <select class="form-control" id="cameraResolution">
+                <option value="640x480">640x480</option>
+                <option value="720p">720p</option>
+                <option value="1080p">1080p</option>
+                <option value="2160p">2160p</option>                
+            </select>
+        </div>
+        <div class="form-group mx-sm-3 mb-2">
+            <label for="cameraISO" class="sr-only">ISO</label>
+            <input class="form-control" id="cameraISO" type="text" placeholder="ISO" />            
+        </div>
+        <input class="btn btn-primary mb-2" id="btnSet" type="button" value="Set" />
+    </div>
+    <div id="frameDiv" style="display:none" class="pd">
+        <p>
+            Count: <span id="frameCount"></span>
+        </p>
+        <img id="frameValue" class="img-fluid" src=""/>
+    </div>
+</div>
+
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            function SetCameraParameters()
+            {
+                console.log(document.getElementById('cameraResolution').value);
+                console.log(document.getElementById('cameraISO').value);
+                let iso = 0;
+                if(document.getElementById('cameraISO').value != '')
+                {
+                    iso = parseInt(document.getElementById('cameraISO').value);
+                }
+                let obj = {'Width': 0, 'Height': 0, 'ISO': 0};
+                switch(document.getElementById('cameraResolution').value)
+                {
+                    case '640x480':
+                        obj.Width = 640;
+                        obj.Height = 480;
+                        obj.ISO = iso;
+                        break;
+                    case '720p':
+                        obj.Width = 1280;
+                        obj.Height = 720;
+                        obj.ISO = iso;
+                        break;
+                    case '1080p':
+                        obj.Width = 1920;
+                        obj.Height = 1080;
+                        obj.ISO = iso;
+                        break;
+                    case '2160p':
+                        obj.Width = 3860;
+                        obj.Height = 2160;
+                        obj.ISO = iso;
+                        break;
+                }
+                $.ajax({
+                    type: "PUT",
+                    url: "/api/camera/@Guid.Empty",
+                    data: JSON.stringify(obj),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    headers: { RequestVerificationToken: $('input:hidden[name="__RequestVerificationToken"]').val()},
+                    success: function (response) {
+                        console.log(response);
+                    },
+                    failure: function (response) {
+                        alert(response.responseText);
+                    },
+                    error: function (response) {
+                        alert(response.responseText);
+                   }
+                });
+            }            
+            function GetFrame()
+            {
+                $.ajax({
+                    type: "GET",
+                    url: "/api/frame/@Guid.Empty",
+                    dataType: "json",
+                    success: function (data) {                        
+                        if(data != undefined)
+                        {
+                            document.getElementById('frameCount').innerHTML  = data.count;
+                            document.getElementById('frameValue').src = 'data:image/jpeg;base64,'+data.value;
+                            document.getElementById('frameDiv').style = '';
+                        }
+                    },
+                    error: function (req, status, error) {
+                        console.log(msg);
+                    }
+                }); 
+            }
+
+            document.getElementById('btnSet').onclick = SetCameraParameters;
+            setInterval(() => GetFrame(), 100);
+
+        });
+    </script>
+}

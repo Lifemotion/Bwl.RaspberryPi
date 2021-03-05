@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace Bwl.RaspberryPi.Camera.TestWebNetCore.Services
 {
-    internal interface ICameraService
+    public interface ICameraService
     {
+        Models.Camera Camera { get;}
         Task DoWork(CancellationToken stoppingToken);
+        void SetParameters(int width, int height, int iso);
     }
 }

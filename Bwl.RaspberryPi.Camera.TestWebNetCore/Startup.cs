@@ -30,7 +30,7 @@ namespace Bwl.RaspberryPi.Camera.TestWebNetCore
             services.AddRazorPages();
 
             services.AddHostedService<CameraHostedService>();
-            services.AddScoped<ICameraService, CameraService>();
+            services.AddSingleton<ICameraService, CameraService>();
             services.AddSingleton<IFrameService, FrameService>();
 
             //services.Configure<ForwardedHeadersOptions>(options =>
