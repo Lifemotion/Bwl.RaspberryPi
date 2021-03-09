@@ -1,6 +1,7 @@
 ﻿using Bwl.RaspberryPi.Camera.TestWebNetCore.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,7 +39,7 @@ namespace Bwl.RaspberryPi.Camera.TestWebNetCore.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(Guid? id, Models.Camera camera)
+        public IActionResult Put(Guid id, Models.Camera camera)
         {
             if (id != camera.Id)
             {
@@ -50,8 +51,7 @@ namespace Bwl.RaspberryPi.Camera.TestWebNetCore.Controllers
             {
                 return NotFound();
             }
-
-            _cameraService.SetParameters(camera.Width, camera.Height, camera.ISO);
+            _cameraService.SetParameters(camera.Width, camera.Height, camera.FPS, camera.Quality, camera.BitRateMbps, camera.Shutter, camera.ISO, camera.Options);
 
             return NoContent();
         }

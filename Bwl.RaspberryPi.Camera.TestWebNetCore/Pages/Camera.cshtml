@@ -6,27 +6,36 @@
 
 <div>
     <h1 class="display-4">@ViewBag.Title</h1>
-    <div class="form-inline">
-        <div class="form-group mb-2">
-            <label for="cameraResolution" class="sr-only">Resolution</label>
-            <select class="form-control" id="cameraResolution">
-                <option value="640x480">640x480</option>
-                <option value="720p">720p</option>
-                <option value="1080p">1080p</option>
-                <option value="2160p">2160p</option>                
-            </select>
+    <div id="panelDiv" style="display:none">
+        <div class="form-inline">
+            <div class="form-group mb-2">
+                <label for="cameraWidth" class="sr-only">Width</label>
+                <input class="form-control" id="cameraWidth" type="text" placeholder="Width" />            
+            </div>
+            <div class="form-group mx-sm-3 mb-2">
+                <label for="cameraHeight" class="sr-only">Height</label>
+                <input class="form-control" id="cameraHeight" type="text" placeholder="Height" />            
+            </div>
+            <div class="form-group mx-sm-3 mb-2">
+                <label for="cameraISO" class="sr-only">ISO</label>
+                <input class="form-control" id="cameraISO" type="text" placeholder="ISO" />            
+            </div>
+            <div class="form-group mx-sm-3 mb-2">
+                <label for="cameraShutter" class="sr-only">Shutter</label>
+                <input class="form-control" id="cameraShutter" type="text" placeholder="Shutter" />            
+            </div>
+            <div class="form-group mx-sm-3 mb-2">
+                <label for="cameraQuality" class="sr-only">Quality</label>
+                <input class="form-control" id="cameraQuality" type="text" placeholder="Quality" />            
+            </div>
+            <input class="btn btn-primary mb-2" id="btnSet" type="button" value="Set" />
         </div>
-        <div class="form-group mx-sm-3 mb-2">
-            <label for="cameraISO" class="sr-only">ISO</label>
-            <input class="form-control" id="cameraISO" type="text" placeholder="ISO" />            
+        <div id="frameDiv" style="display:none">
+            <p>
+                Count: <span id="frameCount"></span>
+            </p>
+            <img id="frameValue" class="img-fluid" src=""/>
         </div>
-        <input class="btn btn-primary mb-2" id="btnSet" type="button" value="Set" />
-    </div>
-    <div id="frameDiv" style="display:none" class="pd">
-        <p>
-            Count: <span id="frameCount"></span>
-        </p>
-        <img id="frameValue" class="img-fluid" src=""/>
     </div>
 </div>
 
@@ -35,69 +44,90 @@
 {
     <script>
         $(document).ready(function () {
+            let camera = {};
             function SetCameraParameters()
             {
-                console.log(document.getElementById('cameraResolution').value);
-                console.log(document.getElementById('cameraISO').value);
-                let iso = 0;
+                if(document.getElementById('cameraWidth').value != '')
+                {
+                    camera.width = parseInt(document.getElementById('cameraWidth').value);
+                }
+                if(document.getElementById('cameraHeight').value != '')
+                {
+                    camera.height = parseInt(document.getElementById('cameraHeight').value);
+                }
                 if(document.getElementById('cameraISO').value != '')
                 {
-                    iso = parseInt(document.getElementById('cameraISO').value);
+                    camera.iso = parseInt(document.getElementById('cameraISO').value);
                 }
-                let obj = {'Width': 0, 'Height': 0, 'ISO': 0};
-                switch(document.getElementById('cameraResolution').value)
+                if(document.getElementById('cameraShutter').value != '')
                 {
-                    case '640x480':
-                        obj.Width = 640;
-                        obj.Height = 480;
-                        obj.ISO = iso;
-                        break;
-                    case '720p':
-                        obj.Width = 1280;
-                        obj.Height = 720;
-                        obj.ISO = iso;
-                        break;
-                    case '1080p':
-                        obj.Width = 1920;
-                        obj.Height = 1080;
-                        obj.ISO = iso;
-                        break;
-                    case '2160p':
-                        obj.Width = 3860;
-                        obj.Height = 2160;
-                        obj.ISO = iso;
-                        break;
+                    camera.shutter = parseInt(document.getElementById('cameraShutter').value);
+                }
+                if(document.getElementById('cameraQuality').value != '')
+                {
+                    camera.quality = parseInt(document.getElementById('cameraQuality').value);
                 }
                 $.ajax({
-                    type: "PUT",
-                    url: "/api/camera/@Guid.Empty",
-                    data: JSON.stringify(obj),
+                    type: 'PUT',
+                    url: '/api/camera/'+camera.id,
+                    data: JSON.stringify(camera),
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     headers: { RequestVerificationToken: $('input:hidden[name="__RequestVerificationToken"]').val()},
                     success: function (response) {
-                        console.log(response);
                     },
                     failure: function (response) {
-                        alert(response.responseText);
+                        console.log(response.responseText);
                     },
                     error: function (response) {
-                        alert(response.responseText);
+                        console.log(response.responseText);
                    }
                 });
             }            
             function GetFrame()
             {
                 $.ajax({
-                    type: "GET",
-                    url: "/api/frame/@Guid.Empty",
-                    dataType: "json",
-                    success: function (data) {                        
+                    type: 'GET',
+                    url: '/api/frame/'+camera.id,
+                    dataType: 'json',
+                    success: function (data) {
                         if(data != undefined)
                         {
                             document.getElementById('frameCount').innerHTML  = data.count;
                             document.getElementById('frameValue').src = 'data:image/jpeg;base64,'+data.value;
                             document.getElementById('frameDiv').style = '';
+                        }else
+                        {
+                            document.getElementById('frameDiv').style = 'display:none';
+                        }
+                        setTimeout(() => GetFrame(), 100);
+                    },
+                    error: function (req, status, error) {
+                        console.log(msg);
+                        setTimeout(() => GetFrame(), 100);
+                    }
+                }); 
+            }
+
+            function GetCamera()
+            {
+                $.ajax({
+                    type: 'GET',
+                    url: '/api/camera',
+                    dataType: 'json',
+                    success: function (data) {                        
+                        if(data != undefined)
+                        {
+                            camera = data[0];
+                            document.getElementById('cameraWidth').value = camera.width;
+                            document.getElementById('cameraHeight').value = camera.height;
+                            document.getElementById('cameraISO').value = camera.iso;
+                            document.getElementById('cameraShutter').value = camera.shutter;
+                            document.getElementById('cameraQuality').value = camera.quality;
+                            document.getElementById('panelDiv').style = '';                            
+
+                            document.getElementById('btnSet').onclick = SetCameraParameters;                            
+                            GetFrame();
                         }
                     },
                     error: function (req, status, error) {
@@ -106,9 +136,7 @@
                 }); 
             }
 
-            document.getElementById('btnSet').onclick = SetCameraParameters;
-            setInterval(() => GetFrame(), 100);
-
+            GetCamera();
         });
     </script>
 }

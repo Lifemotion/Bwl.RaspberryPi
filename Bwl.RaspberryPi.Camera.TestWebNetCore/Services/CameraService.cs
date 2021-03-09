@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,6 +18,9 @@ namespace Bwl.RaspberryPi.Camera.TestWebNetCore.Services
         private RpiCamMMAL _camera = new RpiCamMMAL();
 
         public Models.Camera Camera { get; private set; }
+
+        private Models.Camera updateCamera { get; set; }
+        private readonly object _lock = new object();
         #endregion
 
         #region Constructors
@@ -25,7 +29,7 @@ namespace Bwl.RaspberryPi.Camera.TestWebNetCore.Services
             _logger = logger;
             _frameService = frameService;
 
-            Camera = new Models.Camera();
+            Camera = new Models.Camera(Guid.NewGuid());
         }
         #endregion
 
@@ -34,127 +38,31 @@ namespace Bwl.RaspberryPi.Camera.TestWebNetCore.Services
         {
             _logger.LogInformation("Camera Service running.");
 
-
-            //List<CameraParameters> list = new List<CameraParameters>
-            //{
-            //    new CameraParameters(),
-            //    new CameraParameters(width: 1920, height: 1080, quality: 10, iso: 200),
-            //    new CameraParameters(width: 640, height: 480, quality: 50, iso: 800),
-            //    new CameraParameters(width: 1280, height: 720, quality: 25, iso: 100),
-            //    new CameraParameters(width: 1024, height: 768, quality: 50, iso: 400),
-            //};
-
-            //int timeout = 10000;
-            //using (_camera = new CameraMMAL())
-            //{
-            //    _camera.FrameReady += Camera_FrameReady;
-
-            //    while (!stoppingToken.IsCancellationRequested)
-            //    {
-            //        int count;
-            //        _memoryCache.TryGetValue("_Count", out count);
-            //        count++;
-            //        _memoryCache.Set("_Count", count, new MemoryCacheEntryOptions
-            //        {
-            //            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60)
-            //        });
-            //        _logger.LogInformation("Camera Service is working. Count: {Count}", count);
-
-            //        CameraParameters cameraParameters = new CameraParameters(width: 1920, height: 1080, quality: 10);
-            //        _camera.SetParameters(cameraParameters);
-            //        try
-            //        {
-            //            _camera.Open();
-            //        }
-            //        catch (Exception ex)
-            //        {
-            //            _logger.LogInformation("Camera Service. Count: {Count}, {Exception}", count, ex.Message);
-            //        }
-            //        while (!_camera.IsOpen)
-            //        {
-            //            await Task.Delay(10, stoppingToken);
-            //        }
-            //        _logger.LogInformation("Camera Service. OPEN: {Count}", count);
-
-            //        //await Task.Delay(timeout, stoppingToken);
-            //        while (!stoppingToken.IsCancellationRequested)
-            //        {
-            //            var frame = _camera.TakeOrWaitFrame();
-            //            if (frame != null)
-            //            {
-            //                _logger.LogInformation("Camera Service. TakeOrWaitFrame Count: " + _camera.FrameCount + " Length: " + frame.Buffer.Length + " DateTime: " + DateTime.Now.ToString("yyyy.MM.dd.hh:mm:ss.fff"));
-            //            }
-            //            else
-            //            {
-            //                _logger.LogInformation("Camera Service. TakeOrWaitFrame fail" + " DateTime: " + DateTime.Now.ToString("yyyy.MM.dd.hh:mm:ss.fff"));
-            //                await Task.Delay(500, stoppingToken);
-            //            }
-            //        }
-
-            //        _camera.Close();
-            //        _logger.LogInformation("Camera Service. CLOSE: {Count}", count);
-            //    }
-            //}
-
-            //var camera = new RpiCamMMAL();
-            //camera.FrameReady += Camera_FrameReady;
-            //camera.CameraParameters.Width = 640;
-            //camera.CameraParameters.Height = 480;
-            //camera.CameraParameters.FPS = 20;
-            //camera.CameraParameters.Options = "";
-            //camera.Open();
-
-            //while (!stoppingToken.IsCancellationRequested)
-            //{
-            //    _logger.LogInformation("Processing: " + camera.FrameCounter);
-            //    await Task.Delay(1000, stoppingToken);
-            //}
-            //camera.Close();
-
-            //_thread = new Thread(() =>
-            //{
-            //    _logger.LogInformation("Camera thread started");
-
-            //    var camera = new RpiCamMMAL();
-            //    camera.FrameReady += Camera_FrameReady;
-            //    camera.CameraParameters.Width = 640;
-            //    camera.CameraParameters.Height = 480;
-            //    camera.CameraParameters.FPS = 20;
-            //    camera.CameraParameters.Options = "";
-            //    camera.Open();
-
-            //    while (!stoppingToken.IsCancellationRequested)
-            //    {
-            //        _logger.LogInformation("Processing");
-            //        var bytes = camera.CreateBytesCopy();
-            //        if(bytes.Length > 0)
-            //        {
-            //            _logger.LogInformation($"Processing Length: {bytes.Length} Frames: {camera.FrameCounter}");
-            //        }
-            //        Thread.Sleep(500);                    
-            //    }
-            //    camera.Close();
-            //    _logger.LogInformation("Camera thread stoped");
-            //})
-            //{
-            //    IsBackground = true
-            //};
-            //_thread.Start();
-
-            Camera.Width = 640;
-            Camera.Height = 480;
-            Camera.ISO = 0;
-
-            _camera.FrameReady += Camera_FrameReady;            
+            _camera.FrameReady += Camera_FrameReady;
             _camera.CameraParameters.Width = Camera.Width;
             _camera.CameraParameters.Height = Camera.Height;
+            _camera.CameraParameters.FPS = Camera.FPS;
+            _camera.CameraParameters.Quality = Camera.Quality;
+            _camera.CameraParameters.BitRateMbps = Camera.BitRateMbps;
+            _camera.CameraParameters.Options = Camera.Options;
             _camera.CameraParameters.ISO = Camera.ISO;
-            //_camera.CameraParameters.FPS = 20;
-            //_camera.CameraParameters.Options = "";
+            _camera.CameraParameters.Shutter = Camera.Shutter;
             _camera.Open();
 
             while (!stoppingToken.IsCancellationRequested)
             {
+                lock (_lock)
+                {
+                    if (updateCamera != null)
+                    {
+                        _logger.LogInformation($"Parameters: {JsonSerializer.Serialize(Camera)}");
+
+                        UpdateParameters(updateCamera.Width, updateCamera.Height, updateCamera.FPS, updateCamera.Quality, updateCamera.BitRateMbps, updateCamera.Shutter, updateCamera.ISO, updateCamera.Options);
+
+                        updateCamera = null;
+                    }
+                }
+
                 _logger.LogInformation("Processing");
                 await Task.Delay(1000, stoppingToken);
             }
@@ -166,54 +74,58 @@ namespace Bwl.RaspberryPi.Camera.TestWebNetCore.Services
         {
             var camera = (RpiCamMMAL)source;
 
-            //var fileName = DateTime.Now.ToString("yyyy_MM_dd_hhmmssfff") + "." + Enum.GetName(typeof(FrameType), e.Frame.Type);
-            //File.WriteAllBytes("/home/pi/Camera/" + fileName, e.Frame.Buffer);
-            long FrameCount = camera.FrameCounter;
-            int FrameBytesLength = camera.FrameBytesLength;
-            _logger.LogInformation("Frame saved Count: " + FrameCount + " Length: " + FrameBytesLength + " DateTime: " + DateTime.Now.ToString("yyyy.MM.dd.hh:mm:ss.fff"));
-            //byte[] bytes;
-            //_memoryCache.TryGetValue("_Bytes", out bytes);
-            //bytes = camera.CreateBytesCopy();
-            //_memoryCache.Set("_Bytes", camera.CreateBytesCopy(), new MemoryCacheEntryOptions
-            //{
-            //    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60)
-            //});
             byte[] bytes = camera.CreateBytesCopy();
-            _frameService.SetFrame(bytes);
+            _frameService.SetFrame(bytes, camera.FrameCounter);
         }
 
-        public void SetParameters(int width, int height, int iso)
+        private void UpdateParameters(int width, int height, int fps, int quality, int bitRateMbps, int shutter, int iso, string options)
         {
             Camera.Width = width;
             Camera.Height = height;
+            Camera.FPS = fps;
+            Camera.Quality = quality;
+            Camera.BitRateMbps = bitRateMbps;
+            Camera.Shutter = shutter;
             Camera.ISO = iso;
+            Camera.Options = options;
 
-            _logger.LogInformation($"Parameters: {Camera.Width}x{Camera.Height} {Camera.ISO}ISO");
-
-            bool needClose = false;
-            if (_camera.CameraParameters.Width != Camera.Width || _camera.CameraParameters.Height != Camera.Height)
-            {
-                needClose = true;
-            }
-            if (needClose)
+            if (_camera.CameraParameters.Width != Camera.Width
+                || _camera.CameraParameters.Height != Camera.Height
+                || _camera.CameraParameters.FPS != Camera.FPS
+                || _camera.CameraParameters.Quality != Camera.Quality
+                || _camera.CameraParameters.BitRateMbps != Camera.BitRateMbps
+                || _camera.CameraParameters.Options != Camera.Options)
             {
                 _camera.Close();
 
+                Thread.Sleep(5000);
+
                 _camera.CameraParameters.Width = Camera.Width;
                 _camera.CameraParameters.Height = Camera.Height;
-
+                _camera.CameraParameters.FPS = Camera.FPS;
+                _camera.CameraParameters.Quality = Camera.Quality;
+                _camera.CameraParameters.BitRateMbps = Camera.BitRateMbps;
+                _camera.CameraParameters.Options = Camera.Options;
                 _camera.CameraParameters.ISO = Camera.ISO;
-                //_camera.CameraParameters.FPS = 20;
-                //_camera.CameraParameters.Options = "";    
+                _camera.CameraParameters.Shutter = Camera.Shutter;
 
                 _camera.Open();
             }
             else
             {
                 _camera.CameraParameters.ISO = Camera.ISO;
-                //_camera.CameraParameters.FPS = 20;
-                //_camera.CameraParameters.Options = "";
+                _camera.CameraParameters.Shutter = Camera.Shutter;
                 _camera.Reconfigure();
+            }
+        }
+        public void SetParameters(int width, int height, int fps, int quality, int bitRateMbps, int shutter, int iso, string options)
+        {
+            lock(_lock)
+            {
+                if(updateCamera == null)
+                {
+                    updateCamera = new Models.Camera(Camera.Id, width, height, fps, quality, bitRateMbps, shutter, iso, options);
+                }
             }
         }
 

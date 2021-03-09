@@ -8,7 +8,7 @@ namespace Bwl.RaspberryPi.Camera.TestWebNetCore.Services
     public interface IFrameService
     {
         long Count { get; }
-        void SetFrame(byte[] value);
+        void SetFrame(byte[] value, long count);
         byte[] GetFrame();
     }
 }
