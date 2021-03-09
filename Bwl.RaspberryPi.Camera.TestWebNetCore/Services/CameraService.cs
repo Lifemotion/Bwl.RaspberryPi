@@ -55,7 +55,7 @@ namespace Bwl.RaspberryPi.Camera.TestWebNetCore.Services
                 {
                     if (updateCamera != null)
                     {
-                        _logger.LogInformation($"Parameters: {JsonSerializer.Serialize(Camera)}");
+                        _logger.LogInformation($"Parameters: {JsonSerializer.Serialize(updateCamera)}");
 
                         UpdateParameters(updateCamera.Width, updateCamera.Height, updateCamera.FPS, updateCamera.Quality, updateCamera.BitRateMbps, updateCamera.Shutter, updateCamera.ISO, updateCamera.Options);
 

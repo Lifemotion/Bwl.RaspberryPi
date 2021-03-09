@@ -7,28 +7,43 @@
 <div>
     <h1 class="display-4">@ViewBag.Title</h1>
     <div id="panelDiv" style="display:none">
-        <div class="form-inline">
-            <div class="form-group mb-2">
-                <label for="cameraWidth" class="sr-only">Width</label>
-                <input class="form-control" id="cameraWidth" type="text" placeholder="Width" />            
+        <fieldset>
+            <legend>Camera parameters</legend>
+        </fieldset>
+
+        <div class="form-row align-items-center">
+            <div class="col-auto my-1">
+                <label for="cameraISO" class="mr-sm-2">ISO</label>
+                <input class="form-control mr-sm-2 custom-input" id="cameraISO" type="text" placeholder="ISO" />            
             </div>
-            <div class="form-group mx-sm-3 mb-2">
-                <label for="cameraHeight" class="sr-only">Height</label>
-                <input class="form-control" id="cameraHeight" type="text" placeholder="Height" />            
+            <div class="col-auto my-1">
+                <label for="cameraShutter" class="mr-sm-2">Shutter</label>
+                <input class="form-control mr-sm-2 custom-input" id="cameraShutter" type="text" placeholder="Shutter" />            
+            </div>            
+            <div class="col-auto my-1" id="otherPanel" style="display:none">
+                <div class="form-row align-items-center">
+                    <div class="col-auto my-1">
+                        <label for="cameraWidth" class="mr-sm-2">Width</label>
+                        <input class="form-control mr-sm-2 custom-input" id="cameraWidth" type="text" placeholder="Width" />            
+                    </div>
+                    <div class="col-auto my-1">
+                        <label for="cameraHeight" class="mr-sm-2">Height</label>
+                        <input class="form-control mr-sm-2 custom-input" id="cameraHeight" type="text" placeholder="Height" />            
+                    </div>
+                    <div class="col-auto my-1">
+                        <label for="cameraQuality" class="mr-sm-2">Quality</label>
+                        <input class="form-control mr-sm-2 custom-input" id="cameraQuality" type="text" placeholder="Quality" />            
+                    </div>           
+                </div>
             </div>
-            <div class="form-group mx-sm-3 mb-2">
-                <label for="cameraISO" class="sr-only">ISO</label>
-                <input class="form-control" id="cameraISO" type="text" placeholder="ISO" />            
+            <div class="col-auto my-1">
+                <label for="cameraOther" class="mr-sm-2"></label>
+                <div class="mr-sm-2"><a id="cameraOther" class="btn btn-link mr-sm-2" onclick="javascript:if(this.innerHTML === 'Other'){$('#otherPanel').show();this.innerHTML='Hide'}else{$('#otherPanel').hide();this.innerHTML='Other';}">Other</a></div>
             </div>
-            <div class="form-group mx-sm-3 mb-2">
-                <label for="cameraShutter" class="sr-only">Shutter</label>
-                <input class="form-control" id="cameraShutter" type="text" placeholder="Shutter" />            
-            </div>
-            <div class="form-group mx-sm-3 mb-2">
-                <label for="cameraQuality" class="sr-only">Quality</label>
-                <input class="form-control" id="cameraQuality" type="text" placeholder="Quality" />            
-            </div>
-            <input class="btn btn-primary mb-2" id="btnSet" type="button" value="Set" />
+            <div class="col-auto my-1">
+                <label for="cameraSet" class="mr-sm-2"></label>
+                <div class="mr-sm-2"><button class="btn btn-primary" id="cameraSet" type="button">Set</button></div>                
+            </div> 
         </div>
         <div id="frameDiv" style="display:none">
             <p>
@@ -47,6 +62,8 @@
             let camera = {};
             function SetCameraParameters()
             {
+                $('#cameraSet').prop('disabled', true);
+                document.getElementById('cameraSet').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="sr-only">Loading...</span>';
                 if(document.getElementById('cameraWidth').value != '')
                 {
                     camera.width = parseInt(document.getElementById('cameraWidth').value);
@@ -75,12 +92,18 @@
                     dataType: "json",
                     headers: { RequestVerificationToken: $('input:hidden[name="__RequestVerificationToken"]').val()},
                     success: function (response) {
+                        document.getElementById('cameraSet').innerHTML = 'Set';
+                        $('#cameraSet').prop('disabled', false);
                     },
                     failure: function (response) {
                         console.log(response.responseText);
+                        document.getElementById('cameraSet').innerHTML = 'Set';
+                        $('#cameraSet').prop('disabled', false);
                     },
                     error: function (response) {
                         console.log(response.responseText);
+                        document.getElementById('cameraSet').innerHTML = 'Set';
+                        $('#cameraSet').prop('disabled', false);
                    }
                 });
             }            
@@ -96,10 +119,9 @@
                             document.getElementById('frameCount').innerHTML  = data.count;
                             document.getElementById('frameValue').src = 'data:image/jpeg;base64,'+data.value;
                             document.getElementById('frameDiv').style = '';
-                        }else
-                        {
-                            document.getElementById('frameDiv').style = 'display:none';
                         }
+                        else
+                            document.getElementById('frameDiv').style = 'display:none';
                         setTimeout(() => GetFrame(), 100);
                     },
                     error: function (req, status, error) {
@@ -126,7 +148,7 @@
                             document.getElementById('cameraQuality').value = camera.quality;
                             document.getElementById('panelDiv').style = '';                            
 
-                            document.getElementById('btnSet').onclick = SetCameraParameters;                            
+                            document.getElementById('cameraSet').onclick = SetCameraParameters;                            
                             GetFrame();
                         }
                     },
@@ -135,7 +157,6 @@
                     }
                 }); 
             }
-
             GetCamera();
         });
     </script>
