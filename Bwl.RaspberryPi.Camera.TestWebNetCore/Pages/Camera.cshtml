@@ -46,10 +46,10 @@
             </div> 
         </div>
         <div id="frameDiv" style="display:none">
-            <p>
-                Count: <span id="frameCount"></span>
-            </p>
-            <img id="frameValue" class="img-fluid" src=""/>
+            <p>Count: <span id="frameCount"></span></p>
+            <img id="frameValue" class="img-fluid"/>
+            @*<br />
+            <img id="frameFile" class="img-fluid"/> *@        
         </div>
     </div>
 </div>
@@ -57,8 +57,24 @@
 
 @section Scripts
 {
-    <script>
-        $(document).ready(function () {
+    <script>        
+        $(document).ready(function () {            
+            @*let imageTimer = new Date().getTime();
+            function LoadFrameFile()
+            {
+                imageTimer = new Date().getTime();
+                document.getElementById('frameFile').src='@Url.Content("~/api/frame/image")?'+imageTimer;
+            }            
+            function ReloadFrameFile()
+            {
+                if((new Date().getTime() - imageTimer) > 2000)
+                {
+                    setTimeout(() => LoadFrameFile(), 50);
+                }
+            }
+            document.getElementById('frameFile').onload = LoadFrameFile;
+            setTimeout(() => LoadFrameFile(), 50);
+            setInterval(() => ReloadFrameFile(), 5000);*@
             let camera = {};
             function SetCameraParameters()
             {
@@ -112,6 +128,7 @@
                 $.ajax({
                     type: 'GET',
                     url: '/api/frame/'+camera.id,
+                    contentType: "application/json; charset=utf-8",
                     dataType: 'json',
                     success: function (data) {
                         if(data != undefined)
@@ -122,11 +139,13 @@
                         }
                         else
                             document.getElementById('frameDiv').style = 'display:none';
-                        setTimeout(() => GetFrame(), 100);
+                        setTimeout(() => GetFrame(), 50);
                     },
                     error: function (req, status, error) {
-                        console.log(msg);
-                        setTimeout(() => GetFrame(), 100);
+                        @*console.log(req);
+                        console.log(status);
+                        console.log(error);*@
+                        setTimeout(() => GetFrame(), 500);
                     }
                 }); 
             }
@@ -136,6 +155,7 @@
                 $.ajax({
                     type: 'GET',
                     url: '/api/camera',
+                    contentType: "application/json; charset=utf-8",
                     dataType: 'json',
                     success: function (data) {                        
                         if(data != undefined)
@@ -148,12 +168,14 @@
                             document.getElementById('cameraQuality').value = camera.quality;
                             document.getElementById('panelDiv').style = '';                            
 
-                            document.getElementById('cameraSet').onclick = SetCameraParameters;                            
+                            document.getElementById('cameraSet').onclick = SetCameraParameters;
                             GetFrame();
                         }
                     },
                     error: function (req, status, error) {
-                        console.log(msg);
+                        console.log(req);
+                        console.log(status);
+                        console.log(error);
                     }
                 }); 
             }

@@ -9,14 +9,14 @@ namespace Bwl.RaspberryPi.Camera.TestWebNetCore.Models
     {
         #region Properties
         public long Count { get; private set; }
-        public string Value { get; private set; }
+        public byte[] Value { get; private set; }
         #endregion
 
         #region Constructors
         public Frame()
         {
         }
-        public Frame(long count, string value) : base()
+        public Frame(long count, byte[] value) : base()
         {
             Count = count;
             Value = value;
